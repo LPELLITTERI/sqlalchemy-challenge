@@ -1,9 +1,11 @@
 {
 	"folders": [
 		{
+			"name": "sqlalchemy-challenge",
 			"path": "."
 		},
 		{
+			"name": "Instructions",
 			"path": "../../../Desktop/Instructions"
 		}
 	],
