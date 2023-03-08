@@ -1,4 +1,3 @@
-
 import numpy as np
 
 import sqlalchemy
@@ -15,13 +14,16 @@ engine = create_engine("sqlite:///hawaii.sqlite")
 
 # reflect an existing database into a new model
 Base = automap_base()
+
 # reflect the tables
 Base.prepare(autoload_with=engine)
 
 # View all of the classes that automap found
 Base.classes.keys()
+
 # Save reference to the table
 Measurement = Base.classes.measurement
+
 Station = Base.classes.station
 
 # Create our session (link) from Python to the DB
@@ -47,3 +49,25 @@ def welcome():
 def names():
     # Create our session (link) from Python to the DB
     session = Session(engine)
+
+@app.route('/hello')
+def hello():
+    return 'Hello, World!'
+
+
+@app.route('/api/v1.0/precipitation')
+def precipitation():
+    session = Session()
+    prcp = session.query(Measurement.date, Measurement.prcp).filter(Measurement.date >= '2016-08-23').all()
+    session.close()
+    
+    prcp_dict = {}
+    for date, prcp in prcp:
+        prcp_dict[date] = prcp
+    
+    return jsonify(prcp_dict)
+
+
+if __name__ == '__main__':
+    app.run()
+
