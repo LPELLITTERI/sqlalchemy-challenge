@@ -37,7 +37,7 @@ app = Flask(__name__)
 #################################################
 # Flask Routes
 #################################################
-
+# 1
 @app.route("/")
 def welcome():
     """List all available api routes."""
@@ -45,7 +45,7 @@ def welcome():
         f"Available Routes:<br/>"
     )
 
-
+# 2
 #query results from precipiation analysis only last 12 months
 @app.route('/api/v1.0/precipitation')
 def precipitation():
@@ -60,7 +60,7 @@ def precipitation():
     return jsonify(prcp_dict)
 
 
-
+# 3
 #Return a JSON list of stations from the dataset
 @app.route('/api/v1.0/stations')
 def stations():
@@ -71,7 +71,7 @@ def stations():
     stations_list = list(np.travel(results))
     return jsonify(stations_list)
 
-
+# 4
 #Query the dates and temperature observations of the most-active station for the previous year of data.
 #Return a JSON list of temperature observations for the previous year.
 @app.route('/api/v1.0/tobs')
@@ -98,6 +98,40 @@ def most_active():
 
 
     session.close()
+
+
+# 5
+# /api/v1.0/<start> and /api/v1.0/<start>/<end>
+# Return a JSON list of the minimum temperature, the average temperature, and the maximum temperature for a specified start or start-end range.
+# For a specified start, calculate TMIN, TAVG, and TMAX for all the dates greater than or equal to the start date.
+# For a specified start date and end date, calculate TMIN, TAVG, and TMAX for the dates from the start date to the end date, inclusive.
+
+
+
+@app.route('/api/v1.0/<start>')
+@app.route('/api/v1.0/<start>/<end>')
+def min_max_avg(start, end=None):
+    session = Session()
+    if end:
+        results = session.query(func.min(tobs), func.avg(tobs), func.max(tobs)).\
+                  filter(measurement.date >= start).filter(measurement.date <= end).all()
+    else:
+        results = session.query(func.min(tobs), func.avg(tobs), func.max(tobs)).\
+                  filter(measurement.date >= start).all()
+
+    session.close()
+
+    all_temps = []
+    for min_temp, avg_temp, max_temp in results:
+        temp_dict = {}
+        temp_dict['min_temp'] = min_temp
+        temp_dict['avg_temp'] = avg_temp
+        temp_dict['max_temp'] = max_temp
+        all_temps.append(temp_dict)
+
+    return jsonify(all_temps)
+
+
 
 
 if __name__ == '__main__':
