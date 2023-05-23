@@ -49,7 +49,7 @@ def welcome():
 #query results from precipiation analysis only last 12 months
 @app.route('/api/v1.0/precipitation')
 def precipitation():
-    session = Session()
+    session = Session(engine)
     prcp = session.query(Measurement.date, Measurement.prcp).filter(Measurement.date >= '2016-08-23').all()
     session.close()
     
@@ -111,7 +111,7 @@ def most_active():
 @app.route('/api/v1.0/<start>')
 @app.route('/api/v1.0/<start>/<end>')
 def min_max_avg(start, end=None):
-    session = Session()
+    session = Session(engine)
     if end:
         results = session.query(func.min(tobs), func.avg(tobs), func.max(tobs)).\
                   filter(measurement.date >= start).filter(measurement.date <= end).all()
